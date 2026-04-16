@@ -1,0 +1,10 @@
+[
+  {
+    "model": "courses.category",
+    "pk": 1,
+    "fields": {
+      "name": "Programming",
+      "parent": null
+    }
+  }
+]

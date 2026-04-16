@@ -1,0 +1,202 @@
+[
+  {
+    "model": "courses.lesson",
+    "pk": 3,
+    "fields": {
+      "title": "Lesson 0",
+      "content": "...",
+      "course": 1,
+      "order": 0
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 4,
+    "fields": {
+      "title": "Lesson 1",
+      "content": "...",
+      "course": 1,
+      "order": 1
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 5,
+    "fields": {
+      "title": "Lesson 2",
+      "content": "...",
+      "course": 1,
+      "order": 2
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 6,
+    "fields": {
+      "title": "Lesson 3",
+      "content": "...",
+      "course": 1,
+      "order": 3
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 7,
+    "fields": {
+      "title": "Lesson 4",
+      "content": "...",
+      "course": 1,
+      "order": 4
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 8,
+    "fields": {
+      "title": "Lesson 5",
+      "content": "...",
+      "course": 1,
+      "order": 5
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 9,
+    "fields": {
+      "title": "Lesson 6",
+      "content": "...",
+      "course": 1,
+      "order": 6
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 10,
+    "fields": {
+      "title": "Lesson 7",
+      "content": "...",
+      "course": 1,
+      "order": 7
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 11,
+    "fields": {
+      "title": "Lesson 8",
+      "content": "...",
+      "course": 1,
+      "order": 8
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 12,
+    "fields": {
+      "title": "Lesson 9",
+      "content": "...",
+      "course": 1,
+      "order": 9
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 13,
+    "fields": {
+      "title": "Lesson 10",
+      "content": "...",
+      "course": 1,
+      "order": 10
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 14,
+    "fields": {
+      "title": "Lesson 11",
+      "content": "...",
+      "course": 1,
+      "order": 11
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 15,
+    "fields": {
+      "title": "Lesson 12",
+      "content": "...",
+      "course": 1,
+      "order": 12
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 16,
+    "fields": {
+      "title": "Lesson 13",
+      "content": "...",
+      "course": 1,
+      "order": 13
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 17,
+    "fields": {
+      "title": "Lesson 14",
+      "content": "...",
+      "course": 1,
+      "order": 14
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 18,
+    "fields": {
+      "title": "Lesson 15",
+      "content": "...",
+      "course": 1,
+      "order": 15
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 19,
+    "fields": {
+      "title": "Lesson 16",
+      "content": "...",
+      "course": 1,
+      "order": 16
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 20,
+    "fields": {
+      "title": "Lesson 17",
+      "content": "...",
+      "course": 1,
+      "order": 17
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 21,
+    "fields": {
+      "title": "Lesson 18",
+      "content": "...",
+      "course": 1,
+      "order": 18
+    }
+  },
+  {
+    "model": "courses.lesson",
+    "pk": 22,
+    "fields": {
+      "title": "Lesson 19",
+      "content": "...",
+      "course": 1,
+      "order": 19
+    }
+  }
+]

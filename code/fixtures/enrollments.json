@@ -1,0 +1,11 @@
+[
+  {
+    "model": "courses.enrollment",
+    "pk": 2,
+    "fields": {
+      "user": 1,
+      "course": 1,
+      "enrolled_at": "2026-04-16T16:16:19.056Z"
+    }
+  }
+]
