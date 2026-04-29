@@ -47,6 +47,11 @@ class Course(models.Model):
 
     objects = CourseQuerySet.as_manager()
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['title'], name='idx_course_title'),
+        ]
+
     def __str__(self):
         return self.title
 
@@ -62,6 +67,11 @@ class Lesson(models.Model):
     )
 
     order = models.PositiveIntegerField()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['course', 'order'], name='idx_lesson_course_order'),
+        ]
 
     def __str__(self):
         return self.title
@@ -86,6 +96,9 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ('user', 'course')
+        indexes = [
+            models.Index(fields=['user', 'course'], name='idx_enrollment_user_course'),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.course.title}"
