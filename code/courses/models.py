@@ -1,6 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
 class CourseQuerySet(models.QuerySet):
     def for_listing(self):
         return self.select_related('instructor', 'category')
@@ -126,3 +135,16 @@ class Progress(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.lesson.title}"
 
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('instructor', 'Instructor'),
+        ('student', 'Student'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Course, Lesson, Enrollment, Progress
+from .models import Category, Course, Lesson, Enrollment, Progress, UserProfile
 
 # Register your models here.
 
@@ -37,3 +37,10 @@ class EnrollmentAdmin(admin.ModelAdmin):
 class ProgressAdmin(admin.ModelAdmin):
     list_display = ('user', 'lesson', 'completed', 'updated_at')
     list_filter = ('completed',)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
+    list_filter = ('role',)
+    search_fields = ('user__username',)
+

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'courses',
     'silk',
+    'ninja_simple_jwt',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+from datetime import timedelta
+
+NINJA_SIMPLE_JWT = {
+    "JWT_PRIVATE_KEY_PATH": "jwt-signing.pem",
+    "JWT_PUBLIC_KEY_PATH": "jwt-signing.pub.pem",
+    "JWT_ALGORITHM": "RS256",
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
 
 ROOT_URLCONF = 'lms.urls'
 
