@@ -4,7 +4,7 @@ from typing import List, Optional
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from courses.models import Course, Enrollment, Lesson, Progress
-from courses.schemas import CourseOut, CourseDetail
+from courses.schemas import CourseOut, CourseDetail, CourseCreateSchema, CourseFilterSchema, CourseUpdateSchema
 
 from ninja_simple_jwt.auth.ninja_auth import HttpJwtAuth
 from ninja_simple_jwt.auth.views.api import mobile_auth_router
@@ -13,6 +13,12 @@ from courses.permissions import is_admin, role_required
 from courses.utils import get_real_user
 
 from ninja.errors import HttpError
+
+from ninja.pagination import paginate
+
+from ninja.files import UploadedFile
+from ninja import File
+from django.core.files.storage import default_storage
 
 # PUBLIC API
 apiv1 = NinjaAPI(
@@ -50,16 +56,38 @@ def root(request):
     return {"message": "API is working 🚀"}
 
 @api.get("/courses", response=List[CourseOut])
-def list_courses(request, page: int = 1, page_size: int = 10, search: str = ""):
-    qs = Course.objects.select_related("instructor", "category")
+@paginate
+def list_courses(request, filters: CourseFilterSchema = Query(...)):
+    
+    qs = Course.objects.select_related(
+        "instructor",
+        "category"
+    )
 
-    if search:
-        qs = qs.filter(title__icontains=search)
+    # FILTER TITLE
+    if filters.title:
+        qs = qs.filter(title__icontains=filters.title)
 
-    start = (page - 1) * page_size
-    end = start + page_size
+    # FILTER CATEGORY
+    if filters.category:
+        qs = qs.filter(category_id=filters.category)
 
-    courses = qs[start:end]
+    # FILTER INSTRUCTOR
+    if filters.instructor:
+        qs = qs.filter(
+            instructor__username__icontains=filters.instructor
+        )
+
+    # SORTING WHITELIST
+    allowed_order_fields = [
+        "title",
+        "-title",
+        "created_at",
+        "-created_at",
+    ]
+
+    if filters.ordering in allowed_order_fields:
+        qs = qs.order_by(filters.ordering)
 
     return [
         {
@@ -69,7 +97,7 @@ def list_courses(request, page: int = 1, page_size: int = 10, search: str = ""):
             "instructor": c.instructor.username,
             "category": c.category.name if c.category else None
         }
-        for c in courses
+        for c in qs
     ]
 
 @api.get("/courses/{course_id}", response=CourseDetail)
@@ -108,33 +136,48 @@ def mark_progress(request, enrollment_id: int, lesson_id: int):
 
 @api.post("/courses", auth=apiAuth)
 @role_required("instructor")
-def create_course(request, title: str, description: str):
+def create_course(request, payload: CourseCreateSchema):
     user = get_real_user(request)
 
     course = Course.objects.create(
-        title=title,
-        description=description,
+        title=payload.title,
+        description=payload.description,
         instructor=user
     )
 
-    return {"id": course.id, "title": course.title}
+    return {
+        "id": course.id,
+        "title": course.title
+    }
 
 
 # owner only
 @api.patch("/courses/{course_id}", auth=apiAuth)
-def update_course(request, course_id: int, title: str = None):
+def update_course(
+    request,
+    course_id: int,
+    payload: CourseUpdateSchema
+):
     user = get_real_user(request)
 
     course = get_object_or_404(Course, id=course_id)
 
+    # owner validation
     if course.instructor != user:
         raise HttpError(403, "Not your course")
 
-    if title:
-        course.title = title
-        course.save()
+    # only update sent fields
+    update_data = payload.dict(exclude_unset=True)
 
-    return {"msg": "updated"}
+    for attr, value in update_data.items():
+        setattr(course, attr, value)
+
+    course.save()
+
+    return {
+        "msg": "updated",
+        "updated_fields": list(update_data.keys())
+    }
 
 # admin only
 @api.delete("/courses/{course_id}", auth=apiAuth)
@@ -149,19 +192,26 @@ def delete_course(request, course_id: int):
 def enroll_course(request, course_id: int):
     user = get_real_user(request)
 
+    course = get_object_or_404(Course, id=course_id)
+
     enrollment, created = Enrollment.objects.get_or_create(
         user=user,
-        course_id=course_id
+        course=course
     )
 
-    return {"enrolled": True}
+    return {
+        "enrolled": True,
+        "course": course.title
+    }
 
 
 @api.get("/enrollments/my-courses", auth=apiAuth)
 def my_courses(request):
     user = get_real_user(request)
 
-    enrollments = Enrollment.objects.filter(user=user)
+    enrollments = Enrollment.objects.select_related(
+        "course"
+    ).filter(user=user)
 
     return [
         {
@@ -169,3 +219,44 @@ def my_courses(request):
         }
         for e in enrollments
     ]
+
+
+@api.post("/upload", auth=apiAuth)
+def upload_file(
+    request,
+    file: UploadedFile = File(...)
+):
+    # VALID EXTENSIONS
+    allowed_types = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf"
+    ]
+
+    # VALIDATE TYPE
+    if file.content_type not in allowed_types:
+        raise HttpError(
+            400,
+            "Only JPG, PNG, and PDF allowed"
+        )
+
+    # VALIDATE SIZE (2MB)
+    max_size = 2 * 1024 * 1024
+
+    if file.size > max_size:
+        raise HttpError(
+            400,
+            "File too large (max 2MB)"
+        )
+
+    # SAVE FILE
+    file_name = default_storage.save(
+        f"uploads/{file.name}",
+        file
+    )
+
+    return {
+        "message": "Upload successful",
+        "file": file_name,
+        "url": f"/media/{file_name}"
+    }

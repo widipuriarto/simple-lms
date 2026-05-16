@@ -17,10 +17,26 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from lms.api import api, apiv1
+from django.conf import settings
+from django.conf.urls.static import static
+
+apiv1_urls = apiv1.urls
+api_urls = api.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('silk/', include('silk.urls', namespace='silk')),
-    path('api/', apiv1.urls),
-    path('api/protected/', api.urls),
+
+    # OLD ROUTES (backward compatibility)
+    path("api/", apiv1_urls),
+    path("api/protected/", api_urls),
+
+    # VERSIONED ROUTES
+    path("api/v1/", apiv1_urls),
+    path("api/v1/protected/", api_urls),
 ]
+
+urlpatterns += static(
+    settings.MEDIA_URL,
+    document_root=settings.MEDIA_ROOT
+)
