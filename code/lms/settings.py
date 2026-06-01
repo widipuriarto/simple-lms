@@ -145,3 +145,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# ==========================================
+# ADVANCED API FEATURES CONFIGURATION
+# ==========================================
+
+# 1. Celery Configuration (RabbitMQ Broker & Redis Result Backend)
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "amqp://guest:guest@rabbitmq:5672//")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# 2. Redis Cache Configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://redis:6379/1"),
+    }
+}
+
+# 3. MongoDB Configuration
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://admin:password123@mongodb:27017/")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "lms_analytics")

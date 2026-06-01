@@ -19,6 +19,12 @@ from ninja.pagination import paginate
 from ninja.files import UploadedFile
 from ninja import File
 from django.core.files.storage import default_storage
+from django.core.cache import cache
+
+from courses.utils import rate_limit
+from courses.mongodb import log_activity
+from courses.mongodb import log_activity, get_activity_report
+from courses.tasks import send_enrollment_email, generate_certificate, export_course_report
 
 # PUBLIC API
 apiv1 = NinjaAPI(
@@ -56,9 +62,17 @@ def root(request):
     return {"message": "API is working 🚀"}
 
 @api.get("/courses", response=List[CourseOut])
+@rate_limit(max_requests=60, window=60) 
 @paginate
 def list_courses(request, filters: CourseFilterSchema = Query(...)):
     
+    # --- REDIS CACHING START ---
+    cache_key = f"courses_{filters.title}_{filters.category}_{filters.instructor}_{filters.ordering}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+    # --- REDIS CACHING END ---
+
     qs = Course.objects.select_related(
         "instructor",
         "category"
@@ -89,7 +103,7 @@ def list_courses(request, filters: CourseFilterSchema = Query(...)):
     if filters.ordering in allowed_order_fields:
         qs = qs.order_by(filters.ordering)
 
-    return [
+    data = [
         {
             "id": c.id,
             "title": c.title,
@@ -99,15 +113,28 @@ def list_courses(request, filters: CourseFilterSchema = Query(...)):
         }
         for c in qs
     ]
+    
+    # --- SIMPAN KE CACHE (15 Menit) ---
+    cache.set(cache_key, data, timeout=60*15)
+    
+    return data
 
 @api.get("/courses/{course_id}", response=CourseDetail)
+@rate_limit(max_requests=60, window=60)
 def course_detail(request, course_id: int):
+    # --- REDIS CACHING START ---
+    cache_key = f"course_detail_{course_id}"
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+    # --- REDIS CACHING END ---
+
     c = get_object_or_404(
         Course.objects.select_related("instructor", "category").prefetch_related("lessons"),
         id=course_id
     )
 
-    return {
+    data = {
         "id": c.id,
         "title": c.title,
         "description": c.description,
@@ -115,6 +142,11 @@ def course_detail(request, course_id: int):
         "category": c.category.name if c.category else None,
         "lessons": [l.title for l in c.lessons.all()]
     }
+    
+    # --- SIMPAN KE CACHE (15 Menit) ---
+    cache.set(cache_key, data, timeout=60*15)
+    
+    return data
 
 
 @api.post("/enrollments/{enrollment_id}/progress", auth=apiAuth)
@@ -128,6 +160,16 @@ def mark_progress(request, enrollment_id: int, lesson_id: int):
     )
     progress.completed = True
     progress.save()
+
+    # --- MONGODB LOGGING START ---
+    log_activity(
+        user_id=user.id,
+        action="COMPLETE_LESSON",
+        details={"lesson_id": lesson.id, "lesson_title": lesson.title}
+    )
+    # --- MONGODB LOGGING END ---
+
+    generate_certificate.delay(user.username, lesson.course.title)
 
     return {"status": "completed"}
 
@@ -174,6 +216,10 @@ def update_course(
 
     course.save()
 
+    # --- CACHE INVALIDATION ---
+    cache.delete(f"course_detail_{course_id}") # Hapus cache spesifik untuk course ini
+    cache.clear() # Hapus seluruh cache (termasuk list course) karena datanya berubah
+
     return {
         "msg": "updated",
         "updated_fields": list(update_data.keys())
@@ -184,6 +230,11 @@ def update_course(
 @role_required("admin")
 def delete_course(request, course_id: int):
     Course.objects.filter(id=course_id).delete()
+    
+    # --- CACHE INVALIDATION ---
+    cache.delete(f"course_detail_{course_id}")
+    cache.clear()
+
     return {"msg": "deleted"}
 
 # student only
@@ -198,6 +249,18 @@ def enroll_course(request, course_id: int):
         user=user,
         course=course
     )
+
+    # --- MONGODB LOGGING START ---
+    log_activity(
+        user_id=user.id,
+        action="ENROLL_COURSE",
+        details={"course_id": course.id, "course_title": course.title}
+    )
+    # --- MONGODB LOGGING END ---
+
+    # --- PANGGIL CELERY TASK ---
+    # .delay() melempar tugas ini ke latar belakang!
+    send_enrollment_email.delay(user.email, course.title)
 
     return {
         "enrolled": True,
@@ -260,3 +323,31 @@ def upload_file(
         "file": file_name,
         "url": f"/media/{file_name}"
     }
+
+@api.get("/analytics/reports", auth=apiAuth)
+@role_required("admin")
+def get_analytics(request):
+    """
+    Endpoint khusus admin untuk melihat statistik aktivitas platform.
+    """
+    report = get_activity_report()
+    return {
+        "status": "success",
+        "data": report
+    }
+
+@api.post("/analytics/export", auth=apiAuth)
+@role_required("admin")
+def trigger_export(request):
+    """
+    Endpoint admin untuk memicu pembuatan laporan CSV raksasa di latar belakang.
+    """
+    user = get_real_user(request)
+    
+    # --- PANGGIL CELERY TASK ---
+    export_course_report.delay(user.email)
+    
+    return {
+        "message": "Proses ekspor dimulai! Anda akan menerima laporannya via email beberapa saat lagi."
+    }
+

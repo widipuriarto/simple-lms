@@ -12,6 +12,11 @@ services:
       - .env
     depends_on:
       - db
+      - redis
+      - mongodb
+      - rabbitmq
+    networks:
+      - lms_network
 
   db:
     image: postgres:15
@@ -21,6 +26,88 @@ services:
       POSTGRES_PASSWORD: lms_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lms_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - lms_network
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - lms_network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - lms_network
+
+  celery-worker:
+    build: .
+    command: celery -A lms worker -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    networks:
+      - lms_network
+
+  celery-beat:
+    build: .
+    command: celery -A lms beat -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+    networks:
+      - lms_network
+
+  flower:
+    build: .
+    command: celery -A lms flower --port=5555
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    depends_on:
+      - celery-worker
+      - rabbitmq
+      - redis
+    networks:
+      - lms_network
 
 volumes:
   postgres_data:
+  mongo_data:
+
+networks:
+  lms_network:
+    driver: bridge
