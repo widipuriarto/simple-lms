@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from courses.models import Course, Enrollment, Lesson, Progress
-from courses.schemas import CourseOut, CourseDetail, CourseCreateSchema, CourseFilterSchema, CourseUpdateSchema
+from courses.models import Course, Enrollment, Lesson, Progress, Comment
+from courses.schemas import CourseOut, CourseDetail, CourseCreateSchema, CourseFilterSchema, CourseUpdateSchema, CommentOut, CommentCreateSchema
 
 from ninja_simple_jwt.auth.ninja_auth import HttpJwtAuth
 from ninja_simple_jwt.auth.views.api import mobile_auth_router
@@ -350,4 +350,44 @@ def trigger_export(request):
     return {
         "message": "Proses ekspor dimulai! Anda akan menerima laporannya via email beberapa saat lagi."
     }
+
+@api.get("/courses/{course_id}/comments", response=List[CommentOut])
+def list_comments(request, course_id: int):
+    course = get_object_or_404(Course, id=course_id)
+    comments = Comment.objects.filter(course=course).select_related('user').order_by('-created_at')
+    
+    return [
+        {
+            "id": c.id,
+            "user": c.user.username,
+            "content": c.content,
+            "created_at": c.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for c in comments
+    ]
+
+@api.post("/courses/{course_id}/comments", auth=apiAuth)
+def create_comment(request, course_id: int, payload: CommentCreateSchema):
+    user = get_real_user(request)
+    course = get_object_or_404(Course, id=course_id)
+    
+    comment = Comment.objects.create(
+        user=user,
+        course=course,
+        content=payload.content
+    )
+    return {"message": "Comment created", "id": comment.id}
+
+@api.delete("/comments/{comment_id}", auth=apiAuth)
+def delete_comment(request, comment_id: int):
+    user = get_real_user(request)
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    # Hanya admin atau pembuat komentar yang bisa menghapusnya
+    if user.userprofile.role != "admin" and comment.user != user:
+        from ninja.errors import HttpError
+        raise HttpError(403, "Not allowed to delete this comment")
+        
+    comment.delete()
+    return {"message": "Comment deleted"}
 

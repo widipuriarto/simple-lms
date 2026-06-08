@@ -148,3 +148,21 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='comments')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['course', 'created_at'], name='idx_comment_course_time'),
+        ]
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.course.title}"
+
+
+

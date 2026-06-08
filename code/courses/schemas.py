@@ -31,6 +31,14 @@ class CourseUpdateSchema(Schema):
     description: Optional[str] = None
 
 
+class CommentOut(Schema):
+    id: int
+    user: str
+    content: str
+    created_at: str
+
+class CommentCreateSchema(Schema):
+    content: str
 
 
 

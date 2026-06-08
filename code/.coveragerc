@@ -1,0 +1,7 @@
+[run]
+omit =
+    courses/migrations/*
+    courses/management/*
+    courses/views.py
+    courses/tests.py
+    courses/tests/*
