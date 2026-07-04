@@ -1,0 +1,515 @@
+ 
+ 
+ 
+PENUGASAN FINAL PROJECT  
+Simple LMS Extended Backend  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mata Kuliah: Pemrograman Sisi Server (A11.54403)  
+Program Studi: Teknik Informatika – Universitas Dian Nuswantoro  
+Pengajar: Fahri Firdausillah, S.Kom, M.CS  
+ 
+
+1. Overview  
+Final project ini merupakan kelanjutan dari penugasan semester sebelumnya. Mahasiswa diminta mengembangkan 
+kembali project Simple Learning Management System (LMS) yang sudah dibuat pada tugas capstone, lalu 
+menambahkan fitur lanjutan, peningkatan kualitas sistem, dan integrasi backend yang lebih kompleks sesuai minat 
+dan kemampuan masing -masing.  
+Mahasiswa tidak wajib mengerjakan semua fitur. Pilih beberapa fitur tambahan dari daftar yang disediakan untuk 
+mengumpulkan poin. Disarankan memilih 3 –5 fitur besar yang benar -benar bisa diselesaikan dan diuji dengan baik.  
+Tujuan  
+• Mengintegrasikan seluruh materi mata kuliah Pemrograman Sisi Server.  
+• Melatih mahasiswa mengembangkan backend yang lebih realistis.  
+• Memberikan fleksibilitas agar mahasiswa bisa memilih fitur sesuai minat.  
+• Mendorong eksplorasi fitur lanjutan: caching, async task, analytics, testing, deployment, security.  
+• Menilai kemampuan problem solving, desain sistem, dokumentasi, dan implementasi backend.  
+ 
+2. Basis Project Minimal  
+Final project harus melanjutkan project Simple LMS dari tugas sebelumnya. Minimal project sudah memiliki:  
+• Docker dan Docker Compose.  
+• Django project dengan PostgreSQL.  
+• Model utama: User, Category, Course, Lesson, Enrollment, Progress.  
+• REST API menggunakan Django Ninja.  
+• JWT authentication.  
+• Role -based access control minimal (admin, instructor, student).  
+• Endpoint dasar untuk course, enrollment, dan progress.  
+• Dokumentasi API via Swagger/OpenAPI.  
+Jika project sebelumnya belum lengkap, boleh diperbaiki terlebih dahulu. Namun, perbaikan fitur dasar tidak dihitung 
+sebagai fitur tambahan final project.  
+ 
+3. Skema Penilaian  
+Komponen  Poin Maks  
+Komponen wajib / fondasi  30 
+Fitur tambahan pilihan  50 
+Testing, dokumentasi, dan presentasi  20 
+Total  100 
+ 
+• Mahasiswa boleh mengerjakan fitur tambahan lebih dari 50 poin, tetapi nilai fitur tambahan tetap dibatasi 
+maksimal 50 poin.  
+• Fitur tambahan dapat dipilih bebas selama relevan dengan Simple LMS.  
+• Minimal mengambil fitur tambahan senilai 30 poin.  
+• Untuk nilai sangat baik, disarankan mengambil 45 –60 poin fitur tambahan.  
+ 
+4. Komponen Wajib – 30 Poin  
+Bagian ini wajib dikerjakan semua mahasiswa.  
+Item Wajib  Poin 
+Project dapat dijalankan dengan Docker Compose  5 
+Database PostgreSQL berjalan dan migration berhasil  4 
+Authentication JWT berjalan  4 
+Role admin, instructor, student diterapkan dengan benar  4 
+Endpoint course, lesson, enrollment, progress berjalan  5 
+README berisi cara menjalankan, akun demo, dan endpoint utama  4 
+Swagger/OpenAPI dapat diakses  2 
+Struktur project rapi, tidak hardcode konfigurasi sensitif  2 
+Jika sudah punya semua dari tugas sebelumnya, bagian ini tinggal dirapikan dan dipastikan berjalan.  
+ 
+5. Rekomendasi Paket Fitur Menuju Nilai A  
+Semua paket di bawah berpotensi mendapatkan nilai A jika fondasi project berjalan, fitur yang dipilih benar -benar 
+selesai, testing memadai, dan dokumentasi/demo jelas. Paket ini hanya contoh , mahasiswa boleh menukar fitur 
+dengan fitur lain dari Lampiran Daftar Fitur, selama total poin fitur tambahan mendekati atau melebihi 50 poin.  
+Paket 1 – LMS Experience  
+Cocok untuk membuat LMS terasa lebih lengkap dari sisi pengalaman student dan instructor.  
+Fitur  Fokus Implementasi  Poin 
+Search, filter, dan sorting course lanjutan  Course mudah ditemukan berdasarkan keyword, category, instructor, 
+level, status, dan sorting.  12 
+Rating, review, dan wishlist course  Student dapat memberi review dan menyimpan course favorit.  12 
+Curriculum dan progress belajar detail  Course punya section/module dan progress dihitung lebih akurat.  15 
+Student dashboard  Ringkasan course aktif, progress, dan rekomendasi.  12 
+Total: 51 poin  
+Paket 2 – Instructor & Course Management  
+Memperkuat sisi instructor, admin approval, dan pengelolaan course.  
+Fitur  Fokus Implementasi  Poin 
+Publishing workflow dan approval  Status draft, pending review, published, archived.  15 
+Instructor dashboard  Statistik course dan enrollment.  12 
+Course prerequisite  Enrollment dibatasi berdasarkan course selesai.  12 
+Course announcement  Instructor membuat pengumuman untuk student.  10 
+Permission dan ownership ketat  Instructor hanya kelola course miliknya.  12 
+Total: 61 poin (maks dihitung 50)  
+Paket 3 – Assessment & Certificate  
+LMS memiliki evaluasi pembelajaran dan sertifikat.  
+Fitur  Fokus Implementasi  Poin 
+Quiz dan question bank  Instructor membuat quiz dan soal pilihan ganda.  15 
+Submit quiz dan scoring otomatis  Student mengerjakan quiz, sistem menghitung skor.  15 
+Attempt limit, passing grade, riwayat  Batas percobaan dan riwayat attempt per student.  15 
+Certificate generation  Certificate dibuat setelah course selesai.  15 
+Total: 60 poin (maks dihitung 50)  
+Paket 4 – Performance & API Quality  
+Optimasi backend dan desain API yang rapi.  
+Fitur  Fokus Implementasi  Poin 
+Redis caching untuk course  Course list/detail menggunakan cache Redis.  12 
+Cache invalidation strategy  Cache diperbarui/dihapus saat data berubah.  12 
+Optimasi query dan N+1 fixing  Query endpoint dioptimalkan dan dibuktikan.  15 
+Filtering, sorting, pagination 
+lengkap  Endpoint list lebih fleksibel dan efisien.  12 
+Response dan error format 
+konsisten  Response API rapi dan mudah dipakai client.  10 
+Total: 61 poin (maks dihitung 50)  
+Paket 5 – Analytics & Activity Tracking  
+Fokus pada MongoDB, logging aktivitas, dan laporan analitik.  
+Fitur  Fokus Implementasi  Poin 
+Activity logging ke MongoDB  Event penting student/user dicatat ke MongoDB.  15 
+Learning analytics collection  Data pembelajaran disimpan sebagai dokumen analitik.  15 
+Course analytics report  Admin/instructor melihat statistik course.  15 
+Aggregation query MongoDB  Laporan dengan aggregation pipeline.  15 
+Total: 60 poin (maks dihitung 50)  
+Paket 6 – Async Processing & Notification  
+Fokus pada Celery, RabbitMQ, background task, dan notifikasi.  
+Fitur  Fokus Implementasi  Poin 
+Email notification async  Email/mock email dikirim melalui Celery.  12 
+Generate certificate/report async  Proses berat sebagai background task.  18 
+Scheduled task  Celery beat menjalankan task berkala.  15 
+Task status endpoint  User mengecek status task.  12 
+Flower monitoring  Monitoring Celery di Docker Compose.  8 
+Total: 65 poin (maks dihitung 50)  
+Paket 7 – Security & Account Management  
+Memperkuat keamanan sistem autentikasi dan otorisasi.  
+Fitur  Fokus Implementasi  Poin 
+Refresh token rotation dan logout blacklist  Token lebih aman, logout membatalkan token.  15 
+Password reset dan email verification  Flow akun lebih realistis seperti production.  15 
+Login protection  Rate limit atau account lockout.  12 
+Admin user management dan audit log  Admin kelola user, aktivitas penting tercatat.  15 
+Total: 57 poin (maks dihitung 50)  
+Paket 8 – Production Ready Backend  
+Project siap dijalankan mendekati lingkungan production.  
+Fitur  Fokus Implementasi  Poin 
+Production -like Docker Compose  Compose rapi untuk web, db, redis, worker.  12 
+Gunicorn dan Nginx reverse proxy  Django tidak lagi pakai development server.  18 
+Production settings  Settings production dipisah dan lebih aman.  12 
+Backup dan restore database  Database bisa dibackup/restore dengan script.  18 
+Total: 60 poin (maks dihitung 50)  
+Paket 9 – Testing & Reliability  
+Menonjolkan kualitas, stabilitas, dan pembuktian fitur berjalan.  
+Fitur  Fokus Implementasi  Poin 
+Unit test model dan business logic  Logic penting diuji dengan unit test.  12 
+API test fitur dasar  Endpoint auth, course, enrollment diuji.  12 
+Permission/RBAC test  Hak akses setiap role dipastikan benar.  12 
+Test fitur tambahan  Fitur pilihan utama punya test sendiri.  15 
+CI sederhana  Test otomatis via GitHub Actions/GitLab CI.  15 
+Total: 66 poin (maks dihitung 50)  
+Paket 10 – Eksplorasi Lanjutan  
+Integrasi atau pendekatan menantang di luar materi utama.  
+Fitur  Fokus Implementasi  Poin 
+OAuth Google/GitHub  Login/register dengan provider eksternal.  22 
+Object storage lokal/MinIO  File upload ke object storage lokal.  18 
+Webhook endpoint  Menerima event eksternal, validasi payload.  15 
+Total: 55 poin (maks dihitung 50)  
+ 
+6. Ketentuan Pemilihan Fitur  
+1. Mahasiswa wajib menyelesaikan komponen fondasi terlebih dahulu.  
+2. Mahasiswa bebas memilih fitur tambahan dari kategori mana pun.  
+3. Minimal mengambil fitur tambahan senilai 30 poin.  
+4. Untuk mendapat nilai sangat baik, disarankan mengambil fitur tambahan senilai 45 –60 poin.  
+5. Nilai fitur tambahan maksimal dihitung 50 poin, meskipun mengerjakan lebih.  
+6. Fitur tambahan harus terintegrasi dengan Simple LMS, bukan fitur terpisah.  
+7. Fitur boleh dimodifikasi/diusulkan sendiri, tetapi harus disetujui dosen.  
+8. Fitur yang hanya ada di dokumentasi tetapi tidak berjalan tidak dihitung penuh.  
+9. Fitur yang berjalan tetapi dokumentasinya buruk dapat dikurangi nilainya.  
+10. Fitur yang kompleks tetapi banyak error dapat diberi nilai parsial.  
+ 
+7. Deliverables  
+1. URL repository GitHub/GitLab.  
+2. README lengkap.  
+3. .env.example.  
+4. Dockerfile dan docker -compose.yml.  
+5. Dokumentasi fitur yang dipilih beserta poinnya.  
+6. Screenshot atau video demo singkat.  
+7. Postman collection atau dokumentasi endpoint.  
+8. Akun demo untuk setiap role: admin, instructor, student.  
+9. Data seed/demo agar project mudah diuji.  
+10. Laporan singkat final project (FINAL_PROJECT_REPORT.md).  
+ 
+8. Format Laporan Final Project  
+Buat file FINAL_PROJECT_REPORT.md di root repository dengan struktur berikut:  
+• Identitas: Nama, NIM, Kelas, URL Repository.  
+• Deskripsi Project: Jelaskan singkat project LMS yang dikembangkan.  
+• Fitur Dasar yang Sudah Berjalan: Daftar fitur dasar: Authentication, Course API, Enrollment, Progress, dll.  
+• Fitur Tambahan yang Dipilih: Tabel berisi: No, Fitur, Kategori, Poin, Status (Selesai/Sebagian/Belum).  
+• Penjelasan Implementasi: Jelaskan fitur tambahan utama yang dibuat.  
+• Cara Menjalankan Project: Langkah menjalankan dengan Docker Compose.  
+• Akun Demo: Username/password untuk admin, instructor, student.  
+• Endpoint Penting: Daftar endpoint yang perlu diuji.  
+• Screenshot / Bukti Pengujian: Screenshot Swagger, Postman, atau hasil test.  
+• Kendala dan Solusi: Kendala teknis yang dihadapi dan cara mengatasinya.  
+• Kesimpulan: Refleksi singkat tentang pengalaman mengerjakan final project.  
+ 
+9. Rubrik Penilaian  
+Fondasi Project – 30 Poin  
+Kriteria  Baik Sekali  Cukup  Kurang  
+Docker  Semua service berjalan konsisten  Ada service perlu manual fix  Tidak bisa dijalankan  
+Database  Migration dan seed data lancar  Migration jalan tapi data minim  Error migration  
+API dasar  Endpoint utama lengkap  Ada endpoint kurang  Banyak endpoint gagal  
+Auth/RBAC  Role berjalan benar  Role sebagian jalan  Tidak ada kontrol role  
+Dokumentasi  README jelas  README minim  Tidak ada instruksi jelas  
+ 
+Fitur Tambahan – 50 Poin  
+Penilaian setiap fitur:  
+Aspek Penilaian  Bobot  
+Fitur berjalan sesuai deskripsi  50% 
+Terintegrasi dengan model/API yang sudah ada  20% 
+Validasi dan error handling  15% 
+Dokumentasi / pembuktian pengujian  15% 
+ 
+Kualitas Kode – 15 Poin  
+Kriteria  Poin 
+Struktur app rapi  3 
+Pemisahan logic (tidak semua di view/API)  3 
+Naming model/schema/endpoint jelas  2 
+Tidak hardcode konfigurasi sensitif  2 
+Error handling cukup baik  2 
+Query cukup efisien  2 
+Kode mudah dibaca  1 
+ 
+Testing – 10 Poin  
+Kriteria  Poin 
+Ada test untuk auth/API utama  3 
+Ada test untuk fitur tambahan  3 
+Ada test permission/RBAC  2 
+Dokumentasi hasil test  1 
+Test bisa dijalankan dengan command jelas  1 
+ 
+Dokumentasi dan Presentasi – 10 Poin  
+Kriteria  Poin 
+README lengkap  3 
+Laporan final project jelas  2 
+Swagger/Postman tersedia  2 
+Demo berjalan lancar  2 
+Bisa menjelaskan arsitektur dan fitur  1 
+ 
+10. Bonus dan Penalti  
+Bonus Opsional  
+Bonus  Poin Maks  
+Deployment online yang bisa diakses  +5 
+UI/frontend sederhana untuk demo  +5 
+Fitur inovatif di luar daftar dan relevan  +5 
+Dokumentasi sangat rapi dengan diagram arsitektur  +3 
+Test coverage tinggi dan CI berjalan  +5 
+ 
+Penalti  
+Kondisi  Penalti  
+Project tidak bisa dijalankan sama sekali  −20 s/d −40  
+Tidak menggunakan project LMS / tidak relevan  −30 
+Tidak ada dokumentasi cara menjalankan  −10 
+Hardcode password/token rahasia di repo  −10 
+Plagiarisme / kode identik tanpa penjelasan  Kebijakan akademik  
+Fitur diklaim selesai tapi tidak bisa diuji  Poin tidak dihitung  
+Tidak menggunakan Docker  −10 s/d −20  
+ 
+Lampiran: Daftar Lengkap Fitur Tambahan Pilihan  
+Berikut daftar lengkap fitur yang dapat dipilih. Setiap fitur dilengkapi deskripsi singkat agar implementasi lebih jelas. 
+Mahasiswa disarankan memilih 3 –5 fitur besar, bukan mengejar terlalu banyak fitur kecil.  
+A. Course & Learning Experience  
+Fitur  Deskripsi Singkat  Poin 
+Rating, review, dan wishlist 
+course  Student yang sudah enroll memberi rating/review. Student juga 
+bisa bookmark course. Instructor/admin melihat ringkasan rating.  12 
+Search, filter, dan sorting 
+lanjutan  Endpoint list course: pencarian keyword, filter 
+category/instructor/level/status, sorting newest/popular/rating.  12 
+Curriculum dan progress detail  Course punya section/module sebelum lesson. Progress dihitung 
+per lesson, per section, dan total course.  15 
+Student dashboard  Endpoint dashboard: course aktif, progress masing -masing, course 
+selesai, rekomendasi sederhana.  12 
+Instructor dashboard  Endpoint dashboard: jumlah course, enrollment, progress student, 
+course paling populer miliknya.  12 
+Publishing workflow dan 
+approval  Course punya status: draft, pending review, published, archived. 
+Instructor ajukan publish, admin approve/reject.  15 
+Course prerequisite dan 
+learning path  Course bisa syaratkan course lain harus selesai dulu. Sistem tolak 
+enrollment jika prerequisite belum terpenuhi.  12 
+ 
+B. Assessment, Quiz, dan Certificate  
+Fitur  Deskripsi Singkat  Poin 
+Quiz dan question bank  Instructor buat quiz per course/lesson, soal pilihan ganda, 
+jawaban benar, bobot soal.  15 
+Submit quiz dan scoring 
+otomatis  Student kerjakan quiz via API. Sistem hitung skor otomatis dan 
+simpan attempt.  15 
+Attempt limit, passing grade, 
+riwayat  Quiz punya batas percobaan, passing grade, riwayat attempt per 
+student. Course selesai jika passing grade tercapai.  15 
+Randomisasi quiz  Sistem acak urutan soal dan/atau pilihan jawaban saat quiz 
+dikerjakan.  12 
+Certificate generation  Setelah course selesai, sistem buat certificate dengan kode unik. 
+Bisa dilihat via endpoint.  15 
+Certificate PDF dan verification  Certificate bisa diunduh sebagai PDF. Endpoint publik untuk 
+verifikasi kode unik.  18 
+Leaderboard course  Ranking student berdasarkan skor quiz, progress, atau completion 
+time.  12 
+ 
+C. Authentication, Authorization, dan Security  
+Fitur  Deskripsi Singkat  Poin 
+Refresh token rotation dan 
+logout blacklist  Refresh token diganti tiap digunakan. Token lama/logout tidak 
+bisa dipakai.  15 
+Password reset dan email 
+verification  Reset password via email/mock email. Registrasi bisa pakai email 
+verification.  15 
+Login protection  Login rate limiting dan/atau account lockout setelah gagal 
+beberapa kali. Cocok pakai Redis.  12 
+Permission dan ownership Instructor hanya ubah course miliknya. Student hanya akses 12 
+ketat  materi course yang dienroll.  
+Admin user management dan 
+audit log  Admin lihat/ubah user. Aktivitas penting (login, create/delete 
+course) dicatat sebagai audit log.  15 
+Two -factor authentication 
+sederhana  Login dilengkapi OTP via email/mock email. User masukkan OTP 
+sebelum dapat token.  18 
+Security hardening dasar  Validasi password kuat, sanitasi input, CORS/security settings, 
+tidak ada secret hardcoded.  10 
+ 
+D. Redis, Caching, dan Performance  
+Fitur  Deskripsi Singkat  Poin 
+Redis caching untuk course  Course list dan detail disimpan di Redis agar request berulang 
+lebih cepat. TTL jelas.  12 
+Cache dashboard  Student/instructor dashboard pakai cache karena data mahal 
+dihitung.  12 
+Cache invalidation strategy  Cache dihapus/diperbarui saat course, lesson, enrollment, rating, 
+atau progress berubah.  12 
+API rate limiting berbasis Redis  Endpoint tertentu dibatasi request per menit. Response jelas saat 
+limit terlampaui.  12 
+Optimasi query dan N+1 fixing  Endpoint penting dioptimalkan: select_related/prefetch_related, 
+annotate, index. Bukti query count.  15 
+Pagination, index, dan 
+benchmark  Endpoint list besar pakai pagination efisien, field filter diberi index, 
+benchmark response time.  12 
+Cache monitoring sederhana  Endpoint/laporan yang menunjukkan cache hit/miss, TTL, atau key 
+penting untuk debugging.  10 
+ 
+E. MongoDB dan Analytics  
+Fitur  Deskripsi Singkat  Poin 
+Activity logging ke MongoDB  Event: login, view course, start/complete lesson, enroll dicatat ke 
+MongoDB.  15 
+Learning analytics collection  Data analitik pembelajaran: waktu akses, lesson sering dibuka, 
+progress per student.  15 
+Course analytics report  Endpoint admin/instructor: statistik popularitas, total enrollment, 
+completion rate.  15 
+Student activity report  Ringkasan aktivitas student: course aktif, lesson terakhir, frekuensi 
+belajar.  12 
+Aggregation query MongoDB  Aggregation pipeline: daily active users, course popularity, 
+completion summary.  15 
+Export analytics  Data analytics bisa diekspor ke CSV/JSON via endpoint atau 
+management command.  12 
+Audit trail berbasis MongoDB  Aktivitas sensitif: perubahan role, hapus course, ubah status 
+publish disimpan.  12 
+ 
+F. Celery, RabbitMQ, dan Async Processing  
+Fitur  Deskripsi Singkat  Poin 
+Email notification async  Welcome/enrollment/completion email via Celery, bukan 
+langsung di request API.  12 
+Generate certificate/report Certificate, PDF, CSV report diproses sebagai background task.  18 
+async  
+Scheduled task  Celery beat: update statistik course, cleanup token/cache, 
+reminder belajar.  15 
+Task retry dan error handling  Task gagal bisa retry otomatis. Error dicatat di log/database.  12 
+Task status endpoint  User cek status task: pending, started, success, failed.  12 
+Flower monitoring  Flower di Docker Compose untuk memantau task Celery.  8 
+Bulk notification async  Admin/instructor kirim pengumuman/notifikasi massal via Celery.  15 
+G. Notification System  
+Fitur  Deskripsi Singkat  Poin 
+In-app notification  Model notification. User lihat daftar notifikasi miliknya via API.  10 
+Notification read/unread dan 
+preference  User tandai notifikasi read/unread dan atur jenis notifikasi yang 
+diterima.  10 
+Event -based notification  Notifikasi otomatis: student enroll, lesson baru, course selesai, 
+course diumumkan.  12 
+Broadcast announcement  Admin/instructor kirim announcement ke semua student dalam 
+course.  12 
+Reminder belajar otomatis  Reminder untuk student yang lama tidak akses course. Idealnya 
+via Celery.  15 
+Email/mock email notification  Selain in -app, sistem kirim email/mock email untuk event penting.  10 
+ 
+H. File Upload dan Media Handling  
+Fitur  Deskripsi Singkat  Poin 
+Upload thumbnail dan profile 
+picture  Course punya thumbnail, user punya profile picture. File 
+tersimpan rapi.  10 
+Upload file materi lesson  Instructor unggah file materi: PDF, slide, dokumen pendukung.  12 
+Validasi file upload  Batasi tipe file, ukuran file, error upload ditangani dengan 
+response jelas.  8 
+Private course material  File materi hanya bisa diunduh student yang enroll atau 
+instructor/admin berwenang.  15 
+File lifecycle management  File lama dihapus saat diganti. File terkait dibersihkan saat 
+lesson/course dihapus.  10 
+Image processing sederhana  Thumbnail/profile picture di -resize agar ukuran lebih efisien.  12 
+Dokumentasi media di Docker  README jelaskan konfigurasi media volume, path, cara uji 
+upload/download.  6 
+ 
+I. API Quality dan Developer Experience  
+Fitur  Deskripsi Singkat  Poin 
+Response dan error format 
+konsisten  Semua endpoint punya pola response success/error yang 
+konsisten.  10 
+Error handling terpusat  Permission, validation, not found, server error ditangani rapi.  10 
+API versioning dan OpenAPI 
+rapi Endpoint pakai versi /api/v1/. Swagger diberi tag, description, 
+contoh.  10 
+Filter, search, sort, pagination 
+lengkap  Endpoint list: query parameter jelas dan metadata pagination 
+lengkap.  12 
+Seed/reset demo data 
+command  Management command buat data demo dan/atau reset data 
+demo.  10 
+Environment -based settings  Settings dipisah: development, test, production. Konfigurasi 12 
+sensitif dari env var.  
+Health check dan API changelog  Endpoint health check + catatan perubahan API atau daftar 
+endpoint di docs.  8 
+Postman collection lengkap  Collection memuat flow register, login, course, enrollment, 
+progress, fitur tambahan.  8 
+ 
+J. Testing dan Quality Assurance  
+Fitur  Deskripsi Singkat  Poin 
+Unit test model dan business 
+logic  Test model utama, helper, service, logic penting (progress, 
+permission).  12 
+API test fitur dasar  Test auth, course, enrollment, progress via test client.  12 
+Permission/RBAC test  Test admin, instructor, student, anonymous hanya akses endpoint 
+sesuai.  12 
+Test fitur tambahan  Fitur pilihan (quiz, cache, analytics, notification) punya test 
+khusus.  15 
+Test Redis/Celery/MongoDB  Test atau script validasi caching, background task, logging 
+MongoDB.  15 
+Coverage report  Laporan coverage. 60% = baik, 75%+ = nilai maksimal fitur ini.  15 
+Load test sederhana  Locust, k6, ab, atau script sederhana. Dokumentasikan hasilnya.  15 
+CI sederhana  GitHub Actions/GitLab CI jalankan test otomatis saat push/PR.  15 
+ 
+K. Deployment dan Production Readiness  
+Fitur  Deskripsi Singkat  Poin 
+Production -like Docker 
+Compose  Compose: service web, db, redis, worker, konfigurasi mendekati 
+production.  12 
+Gunicorn dan Nginx reverse 
+proxy  Django pakai Gunicorn. Nginx jadi reverse proxy. Static/media files 
+ditangani.  18 
+Production settings  Settings terpisah, DEBUG false, allowed hosts, env var, 
+static/media config.  12 
+Backup dan restore database  Script/command backup dan restore PostgreSQL + dokumentasi 
+cara pakai.  18 
+Health check dan logging 
+production  Service punya health check, log mudah dibaca, error penting 
+tercatat.  12 
+Deployment online/local server  Deploy ke VPS/cloud/local server yang bisa diuji + dokumentasi 
+deployment.  22 
+HTTPS / reverse proxy config  HTTPS simulation/self -signed atau dokumentasi reverse proxy 
+production.  15 
+Makefile atau command helper  Makefile/script untuk up, down, migrate, test, seed, logs.  8 
+ 
+L. Observability, Logging, dan Monitoring  
+Fitur  Deskripsi Singkat  Poin 
+Request dan structured logging  Request penting dicatat: method, path, user, status code, 
+duration.  12 
+Error dan slow query logging  Exception penting dan query lambat dicatat untuk debugging.  12 
+Health check dan metrics 
+endpoint  Status app, db, Redis, metrik sederhana (jumlah 
+user/course/enrollment).  12 
+Admin audit log  Aksi admin (ubah role, hapus course, approve) dicatat dan bisa 12 
+dilihat.  
+Dashboard statistik JSON  Endpoint ringkasan statistik untuk admin: total user, course, 
+enrollment.  12 
+Dokumentasi observability  README: cara baca log, cek health, lihat Flower, troubleshooting 
+umum.  8 
+ 
+M. Business Feature Tambahan  
+Fitur  Deskripsi Singkat  Poin 
+Tag dan category hierarchy  Course punya tag dan category bertingkat. Endpoint filter by 
+tag/category.  10 
+Discussion dan threaded 
+comment  Student diskusi pada course/lesson. Komentar punya 
+reply/thread.  15 
+Moderasi dan report content  Student lapor komentar. Instructor/admin sembunyikan/hapus 
+komentar.  15 
+Course announcement  Instructor buat pengumuman. Student yang enroll bisa 
+melihatnya.  10 
+Student notes dan bookmark 
+lesson  Student simpan catatan pribadi pada lesson dan bookmark lesson 
+tertentu.  12 
+Course completion rules  Course selesai jika aturan terpenuhi (semua lesson + quiz lulus).  12 
+Learning path / course bundle  Beberapa course digabung jadi learning path dengan urutan 
+belajar.  15 
+Instructor application  Student ajukan diri jadi instructor, admin approve/reject.  12 
+Payment simulation  Simulasi course berbayar, order, payment status, coupon. Tanpa 
+gateway asli.  18 
+ 
+N. Integrasi Eksternal atau Eksplorasi Bebas  
+Fitur  Deskripsi Singkat  Poin 
+Email SMTP sungguhan  Email dikirim via SMTP provider atau mail testing service.  12 
+Payment sandbox/mock 
+gateway  Integrasi payment sandbox: create payment dan callback/status 
+update.  22 
+OAuth Google/GitHub  Login/register via OAuth provider Google atau GitHub.  22 
+Webhook endpoint  Endpoint webhook terima event eksternal, validasi payload, catat 
+event.  15 
+Import/export CSV/Excel  Admin/instructor import course/student atau export 
+enrollment/report.  15 
+Object storage lokal/MinIO  File upload ke MinIO atau object storage lokal.  18 
+Error tracking/monitoring 
+eksternal  Integrasi Sentry, Prometheus/Grafana, atau monitoring sejenis.  18 
+GraphQL endpoint tambahan  Selain REST, sistem punya GraphQL endpoint untuk data utama.  22 
+WebSocket notification  Notifikasi realtime sederhana via WebSocket.  22 
+ 

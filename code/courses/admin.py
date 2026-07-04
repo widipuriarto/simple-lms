@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Course, Lesson, Enrollment, Progress, UserProfile
+from .models import Category, Course, Lesson, Enrollment, Progress, UserProfile, Comment, Section, Review, Wishlist
 
 # Register your models here.
 
@@ -43,4 +43,19 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'role')
     list_filter = ('role',)
     search_fields = ('user__username',)
+
+@admin.register(Section)
+class SectionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'course', 'order')
+    list_filter = ('course',)
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'rating', 'created_at')
+    list_filter = ('rating', 'created_at')
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'created_at')
+
 

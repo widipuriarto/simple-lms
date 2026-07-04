@@ -4,10 +4,13 @@ from django.contrib.auth.models import User
 from courses.models import (
     Category,
     Course,
+    Section,
     Lesson,
     Enrollment,
     Progress,
-    UserProfile
+    UserProfile,
+    Review,
+    Wishlist
 )
 
 import random
@@ -24,9 +27,12 @@ class Command(BaseCommand):
 
         print("Deleting old data...")
 
+        Wishlist.objects.all().delete()
+        Review.objects.all().delete()
         Progress.objects.all().delete()
         Enrollment.objects.all().delete()
         Lesson.objects.all().delete()
+        Section.objects.all().delete()
         Course.objects.all().delete()
         Category.objects.all().delete()
         UserProfile.objects.all().delete()
@@ -99,13 +105,18 @@ class Command(BaseCommand):
 
         courses = []
 
+        levels = ['beginner', 'intermediate', 'advanced']
+        statuses = ['draft', 'published', 'published'] # Mayoritas published agar muncul di endpoint
+
         for i in range(60):
 
             course = Course.objects.create(
                 title=f"Course {i}",
                 description="Lorem ipsum dolor sit amet",
                 instructor=random.choice(instructors),
-                category=random.choice(categories)
+                category=random.choice(categories),
+                level=random.choice(levels),
+                status=random.choice(statuses)
             )
 
             courses.append(course)
@@ -114,22 +125,29 @@ class Command(BaseCommand):
         # LESSONS
         # ======================================
 
-        print("Creating lessons...")
+        print("Creating sections & lessons...")
 
         lessons = []
 
         for course in courses:
-
-            for i in range(5):
-
-                lesson = Lesson.objects.create(
-                    title=f"{course.title} - Lesson {i}",
-                    content="Lesson content",
+            # Buat 3 section untuk tiap course
+            for s in range(3):
+                section = Section.objects.create(
+                    title=f"Section {s + 1} of {course.title}",
                     course=course,
-                    order=i + 1
+                    order=s + 1
                 )
-
-                lessons.append(lesson)
+                
+                # Buat 4 lesson untuk tiap section
+                for i in range(4):
+                    lesson = Lesson.objects.create(
+                        title=f"{section.title} - Lesson {i + 1}",
+                        content="Lesson content",
+                        course=course,
+                        section=section,
+                        order=i + 1
+                    )
+                    lessons.append(lesson)
 
         # ======================================
         # ENROLLMENTS
@@ -168,6 +186,33 @@ class Command(BaseCommand):
                     user=enrollment.user,
                     lesson=lesson,
                     completed=random.choice([True, False])
+                )
+
+        # ======================================
+        # REVIEWS & WISHLISTS
+        # ======================================
+
+        print("Creating reviews & wishlists...")
+        
+        for student in students:
+            enrolled_courses = [e.course for e in Enrollment.objects.filter(user=student)]
+            reviewed_courses = random.sample(enrolled_courses, min(3, len(enrolled_courses)))
+            
+            for course in reviewed_courses:
+                Review.objects.create(
+                    user=student,
+                    course=course,
+                    rating=random.randint(3, 5),
+                    comment="Materi kursus ini sangat bagus dan terstruktur!"
+                )
+            
+            not_enrolled = [c for c in courses if c not in enrolled_courses]
+            wishlist_courses = random.sample(not_enrolled, min(4, len(not_enrolled)))
+            
+            for course in wishlist_courses:
+                Wishlist.objects.create(
+                    user=student,
+                    course=course
                 )
 
         print("✅ SEEDING DONE!")

@@ -16,13 +16,16 @@ def is_admin(func):
         return func(request, *args, **kwargs)
     return wrapper
 
-def role_required(role_name):
+def role_required(roles):
+    if isinstance(roles, str):
+        roles = [roles]
+        
     def decorator(func):
         @functools.wraps(func)
         def wrapper(request, *args, **kwargs):
             user = get_real_user(request)
-            if user.userprofile.role != role_name:
-                raise HttpError(403, f"Forbidden: Requires {role_name} role")
+            if user.userprofile.role not in roles:
+                raise HttpError(403, f"Forbidden: Requires {roles} role")
             return func(request, *args, **kwargs)
         return wrapper
     return decorator
