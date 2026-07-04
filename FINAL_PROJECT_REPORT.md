@@ -3,8 +3,8 @@
 ## 1. Identitas
 - **Nama:** Puriarto Bagas Widiantoro
 - **NIM:** A11.2023.14962
-- **Kelas:** 
-- **URL Repository:** [Link Repository GitHub]
+- **Mata Kuliah:** Pemrograman Sisi Server 
+- **URL Repository:** https://github.com/widipuriarto/simple-lms](https://github.com/widipuriarto/simple-lms)
 
 ## 2. Deskripsi Project
 Simple LMS adalah sebuah sistem manajemen pembelajaran berbasis *backend* yang mengusung arsitektur *microservices-ready*. Dibangun dengan kerangka kerja Django Ninja modern, proyek ini menyediakan fungsionalitas mumpuni; mulai dari hierarki materi (*Section & Lesson*) yang terstruktur, perekaman jejak progres (*Progress*) siswa yang akurat secara matematis, hingga fitur komunitas seperti sistem Ulasan (*Review*) dan Daftar Keinginan (*Wishlist*).
@@ -32,53 +32,116 @@ Berikut adalah fondasi fitur dasar penyokong sistem yang sukses beroperasi:
 
 ## 5. Penjelasan Implementasi & Bukti Pengujian (Screenshots)
 
-*Semua dokumentasi visual (assets) diambil dari hasil pengujian murni melalui sistem dan antarmuka Swagger.*
+*Seluruh dokumentasi gambar (*assets*) diambil secara langsung dari hasil pengujian *live* sistem dan antarmuka Swagger API.*
 
-### A. Komponen Wajib (Fondasi)
-**1. Docker Compose dan Database PostgreSQL**
-Sistem berjalan stabil secara orkestrasi via `docker-compose ps`. Migrasi tabel inti (`courses`, `auth`, dll) sukses ter- *mapping* di basis data PostgreSQL.
-- ![Docker ps](assets/docker_ps.png) *(Status semua container UP)*
-- ![ShowMigrations](assets/show-migrations.png) *(Tabel sukses tercipta di DB)*
+### A. Komponen Wajib (Fondasi Project)
 
-**2. Model Utama LMS (Django Admin)**
-Objek utama `User`, `Category`, `Course`, `Lesson`, `Enrollment`, `Progress` dapat dioperasikan penuh di portal Django Admin.
-- ![Django Admin](assets/django-admin.png) *(Halaman Administrator LMS Utama)*
+#### 1. Project dapat dijalankan dengan Docker Compose
+**Deskripsi Implementasi:**
+Keseluruhan sistem *Simple LMS* ini dibungkus (*containerized*) menggunakan Docker. Komponen-komponen seperti *web server* (Django), *database* (PostgreSQL & MongoDB), *message broker* (RabbitMQ), dan *cache* (Redis) diorkestrasi secara terpusat melalui konfigurasi file `docker-compose.yml`.
 
-**3. Autentikasi JWT & Role (RBAC)**
-Kami memvalidasi tiga peran (Admin, Instructor, Student) dengan skenario penolakan hak akses (*Student* tidak diizinkan menciptakan/menghapus kursus).
-- ![JWT Token](assets/jwt-token.png) *(Token Berhasil Digenerate)*
-- ![Role Forbidden](assets/role-forbidden.png) *(Akses Ilegal Ditolak 403)*
-- ![Role Success](assets/role-success.png) *(Akses Legal Instructor 201)*
-- ![Role Admin](assets/admin-success.png) *(Akses Legal Admin Hapus Course)*
+**Bukti Pengujian:**
+- ![Docker ps](assets/docker_ps.png)
+*Gambar di atas adalah output dari perintah `docker-compose ps` yang menunjukkan seluruh container beroperasi mulus (berada pada state Up).*
 
-**4. Endpoint Core (Course & Enrollment)**
-API inti merespons daftar kursus dan perintah pendaftaran (*enrollment*) dengan baik.
-- ![Course List](assets/course-list.png) *(Daftar Kursus Inti)*
-- ![Enrollment Success](assets/enrollment-success.png) *(Pendaftaran Berhasil)*
-- ![Swagger UI](assets/swagger-ui.png) *(Keseluruhan Antarmuka API Docs)*
+#### 2. Database PostgreSQL berjalan dan migration berhasil
+**Deskripsi Implementasi:**
+Sebagai media penyimpanan relasional utama, aplikasi ini dihubungkan secara eksklusif ke instance PostgreSQL. Skema tabel dikonstruksi secara otomatis melalui sistem *Migration* bawaan Django yang dioperasikan sesaat setelah kontainer database siap.
 
-### B. Fitur Tambahan Paket 1 (LMS Experience)
-**1. Database Enhancement & Relasi Baru**
-Skema `Course` ditambahkan atribut `level` & `status`. Tiga buah entitas baru (`Section`, `Review`, dan `Wishlist`) sukses bermigrasi.
-- ![Django Admin Paket 1](assets/django-admin-models.png) *(Tabel Tambahan Muncul di Portal Admin)*
+**Bukti Pengujian:**
+- ![ShowMigrations](assets/show-migrations.png)
+*Tangkapan layar di atas memperlihatkan deretan checklist `[X]` pada aplikasi `courses` dan aplikasi inti lainnya, membuktikan bahwa skema database berhasil diterapkan sepenuhnya ke dalam PostgreSQL.*
 
-**2. Search, Filter, dan Sorting (12 Poin)**
-Penyaringan diimplementasikan pada *schema* `django-ninja` dan dukungan pencarian teks penuh (di Judul & Deskripsi) mengandalkan klausa OR via objek `Q` dari Django ORM.
-- ![Search Field Filter](assets/swagger-filter-search.png)
+#### 3. Model Utama LMS (User, Category, Course, Lesson, Enrollment, Progress)
+**Deskripsi Implementasi:**
+Sebagai fondasi dari sistem *Learning Management System*, kami telah mendefinisikan seluruh model data esensial yang saling berelasi. Model-model tersebut mencakup: entitas `User` (dikembangkan dengan profil Role), `Category` (kategori kursus), `Course` (entitas kursus inti), `Lesson` (sub-materi kursus), `Enrollment` (pendaftaran siswa), dan `Progress` (jejak penyelesaian materi).
+
+**Bukti Pengujian:**
+- ![Django Admin](assets/django-admin.png)
+*Halaman beranda Django Admin yang menampilkan daftar seluruh tabel model LMS yang telah diregistrasikan dan siap dikelola (CRUD).*
+
+#### 4. Authentication JWT Berjalan & Role admin, instructor, student diterapkan
+**Deskripsi Implementasi:**
+Aplikasi mengamankan *endpoints* dengan menggunakan *JSON Web Token* (JWT) via pustaka `ninja_simple_jwt`. Untuk manajemen hak akses atau *Role-Based Access Control* (RBAC), pengguna dibagi menjadi tiga tingkatan *role*:
+- **Admin**: Wewenang absolut (termasuk penghapusan *Course*).
+- **Instructor**: Diizinkan untuk merancang dan mempublikasikan *Course* beserta *Lesson*.
+- **Student**: Terbatas hanya pada akses konsumsi (*enroll* dan *view* materi).
+
+**Bukti Pengujian:**
+- ![JWT Token](assets/jwt-token.png)
+*Hasil login akun tipe student yang memunculkan token Bearer (Access & Refresh token).*
+- ![Role Forbidden](assets/role-forbidden.png)
+*Hasil penolakan hak akses (Role Forbidden / HTTP 403) ketika akun tipe student mencoba memaksa membuat sebuah course.*
+- ![Role Success](assets/role-success.png)
+*Hasil kesuksesan otorisasi (Role Success) ketika akun tipe instructor sukses membuat sebuah course.*
+- ![Role Admin](assets/admin-success.png)
+*Hasil pengujian wewenang admin yang sukses menghapus course secara mutlak.*
+
+#### 5. Endpoint course, lesson, enrollment, progress berjalan
+**Deskripsi Implementasi:**
+Sistem menyediakan antarmuka REST API komprehensif. *Course API* melayani pencarian dan CRUD. *Enrollment API* mencatat pendaftaran siswa agar mereka berhak mengakses materi. Sementara *Progress API* mencatat jejak penyelesaian tiap materi (*lesson*).
+
+**Bukti Pengujian:**
+- ![course-list](assets/course-list.png)
+*Hasil eksekusi `GET /api/v1/protected/courses` yang menampilkan keseluruhan daftar kursus secara publik.*
+- ![enrollment-success](assets/enrollment-success.png)
+*Hasil eksekusi `POST /api/v1/protected/enrollments` saat Student berhasil mendaftarkan diri pada sebuah kursus.*
+
+#### 6. Swagger/OpenAPI dapat diakses
+**Deskripsi Implementasi:**
+Dokumentasi API interaktif dirender otomatis melalui fitur *OpenAPI Schema* bawaan `django-ninja`. Kehadiran Swagger UI menjadi sarana vital untuk mempermudah eksplorasi *endpoints*, struktur JSON, dan melakukan pengujian *real-time*.
+
+**Bukti Pengujian:**
+- ![Swagger UI](assets/swagger-ui.png)
+*Halaman utama Swagger UI yang memuat daftar lengkap berbagai endpoint API yang terekspos dari backend LMS.*
+
+---
+
+### B. Fitur Tambahan: Paket 1 – LMS Experience
+
+#### 1. Database & Model Enhancement (Prasyarat)
+**Deskripsi Implementasi:**
+Sebagai fondasi paket ekstensi, skema `Course` ditambahkan variabel enumerasi `level` dan `status`. Tiga buah entitas pendukung yang benar-benar baru (`Section`, `Review`, dan `Wishlist`) divalidasi dan dilempar (*migrate*) ke database.
+
+**Bukti Pengujian:**
+- ![Django Admin Paket 1](assets/django-admin-models.png)
+*Penampakan mutakhir portal admin yang telah merangkum model tabel-tabel ekstensi baru (Reviews, Sections, Wishlists).*
+
+#### 2. Search, filter, dan sorting course lanjutan
+**Deskripsi Implementasi:**
+*Course mudah ditemukan berdasarkan keyword, category, instructor, level, status, dan sorting.* Kami mengimplementasikan logika penyaringan menggunakan antarmuka `django-ninja` (Schema Filter) dikombinasikan dengan pencarian teks penuh (mencari ke dalam judul dan deskripsi) via objek klausa `Q` pada ORM Django di rute `GET /courses`.
+
+**Bukti Pengujian:**
+- ![Search Field Filter Swagger](assets/swagger-filter-search.png)
+*Tampilan form filter pada antarmuka interaktif Swagger.*
 - ![Filter Swagger](assets/swagger-filter.png)
+*Hasil pengujian eksekusi endpoint `GET /courses` dengan memberikan kombinasi nilai input spesifik di parameter `level`, `status`, dan `search`.*
 
-**3. Rating, Review, dan Wishlist (12 Poin)**
-Siswa yang sukses mendaftar bisa membintangi kursus (*Review*), atau memasukkan kursus publik ke dalam penyimpanan (*Wishlist*).
-- ![Review Course](assets/swagger-review.png)
-- ![Wishlist Course](assets/swagger-wishlist.png)
+#### 3. Rating, review, dan wishlist course
+**Deskripsi Implementasi:**
+*Student dapat memberi review dan menyimpan course favorit.* Fitur ini direalisasikan melalui penciptaan entitas `Review` (mencatat bintang/komentar) dan `Wishlist` (daftar keinginan). Kami menggunakan proteksi validasi pendaftaran (*enrollment validation*) agar hanya siswa yang terdaftar yang boleh memberikan *Review*.
 
-**4. Curriculum (Nested) dan Progress (15 Poin)**
-Materi pelajaran beralih format menjadi berjenjang/bersarang (`Course -> Section -> Lesson`). Selain itu, kalkulasi kelulusan diukur mutlak di *backend* (jumlah *Lesson* yang tamat dibagi total *Lesson*).
-- ![Nested Curriculum](assets/swagger-curriculum.png)
+**Bukti Pengujian:**
+- ![Review Course Swagger](assets/swagger-review.png)
+*Hasil eksekusi endpoint pengiriman atau pembacaan ulasan (Review) pada sebuah kursus tertentu.*
+- ![Wishlist Course Swagger](assets/swagger-wishlist.png)
+*Hasil eksekusi endpoint `GET /wishlist` yang memunculkan daftar kursus favorit milik seorang siswa.*
 
-**5. Student Dashboard (12 Poin)**
-Sebuah *endpoint* raksasa tunggal di rute `/dashboard/student` diciptakan untuk meringkas 3 kondisi: Kursus aktif, Kursus yang sudah selesai (Tamat 100%), dan Daftar rekomendasi kursus di kategori serupa.
-- ![Student Dashboard](assets/swagger-dashboard.png)
+#### 4. Curriculum dan progress belajar detail
+**Deskripsi Implementasi:**
+*Course punya section/module dan progress dihitung lebih akurat.* Struktur hierarki kursus yang tadinya berderet lurus, kini dipecah bertingkat menjadi `Course -> Section -> Lesson`. Untuk penghitungan persentase ketuntasan (0.0% hingga 100.0%), kami tidak menggunakan kalkulasi kasual, melainkan algoritma matematis komputasi murni dari titik pusat *backend*.
+
+**Bukti Pengujian:**
+- ![Nested Curriculum Swagger](assets/swagger-curriculum.png)
+*Bukti respon berjenjang JSON (Nested Schema) pada saat pemanggilan Detail Course, yang memperlihatkan susunan Section dan Lesson anak-anaknya secara elegan.*
+
+#### 5. Student dashboard
+**Deskripsi Implementasi:**
+*Ringkasan course aktif, progress, dan rekomendasi.* Endpoint `/dashboard/student` diciptakan secara eksklusif untuk merekapitulasi seluruh perjalanan belajar siswa secara *real-time*. Logika *backend* melakukan sapuan kueri untuk mengelompokkan kursus menjadi: *Active* (Sedang dipelajari), *Completed* (Tamat 100%), dan merekomendasikan kursus-kursus (*Recommended*) berdasar kategori yang sedang ia tekuni.
+
+**Bukti Pengujian:**
+- ![Student Dashboard Swagger](assets/swagger-dashboard.png)
+*Data JSON hasil `GET /dashboard/student` yang merangkum keseluruhan informasi holistik milik seorang siswa di satu layar.*
 
 ## 6. Cara Menjalankan Project (Docker)
 Langkah-langkah mereplikasi ekosistem proyek ini:
