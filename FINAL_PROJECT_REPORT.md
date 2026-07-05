@@ -207,12 +207,9 @@ Seluruh antarmuka ini wajib disematkan *Bearer Token* di bagian Auth (kecuali ja
 
 ## 9. Kendala dan Solusi
 Beberapa rintangan teknis yang berhasil diatasi sepanjang masa pengerjaan:
-1. **Transmisi Sinyal Inotify Docker Windows Terputus:** 
-   Perubahan baris kode di `api.py` dan `schemas.py` acap kali tak terekam oleh *StatReloader* karena hilangnya deteksi sinyal simpan-file (*inotify*) antara Windows dan kontainer Linux. **Solusi:** Memaksa siklus penyegaran *web container* secara manual (`docker-compose restart web`) pasca suntingan krusial.
-2. **Pydantic Validation Error (Type-Safety) pada Schema:**
-   Sistem melempar Error 500 karena objek PostgreSQL bertipe *datetime* dipaksa masuk ke dalam *schema* bertipe `str` murni, dan `CourseOut` tidak mengenali objek `User`/`Category`. **Solusi:** Menukar tipe pada *schema* menjadi `datetime` dari *library* bawaan, dan menginjeksi metode pelacak khusus (`resolve_instructor` / `resolve_category`).
-3. **Konflik Array di Role-Based Access Control:**
-   *Endpoint* menolak token *legal* (403 Forbidden) akibat metode *decorator* pelindung mencoba membandingkan string secara mentah dengan sebuah *list* (`"student" == ["student"]`). **Solusi:** Melakukan re-faktor total terhadap algoritma `role_required` agar merujuk pada logika `in list` (himpunan keanggotaan).
+1. Saat saya menambahkan Fitur Paket 1 LMS Experience, itu cukup sulit, karena mengubah struktur data yang sudah ada, termasuk di file models dan schema.
+2. Saat saya mengintegrasikan validasi struktur data, saya menemukan masalah karena format tanggal dan relasi data dari database tidak langsung cocok dengan yang diminta sistem. Ini cukup memakan waktu karena saya harus menyesuaikan tipe datanya dan menambahkan fungsi khusus agar informasi pembuat kursus dan kategori bisa terbaca dengan baik.
+3. Saat saya membuat perlindungan hak akses (seperti siapa yang admin atau instruktur), saya sempat bingung karena sistem secara keliru menolak akses tersebut. Ternyata masalahnya ada pada cara sistem membaca teks sebagai daftar huruf, sehingga saya harus merombak sedikit logikanya agar sistem bisa mengenali peran pengguna dengan benar.
 
 ## 10. Kesimpulan
 Menggelar konstruksi *Simple LMS Backend* merupakan pembelajaran luar biasa ihwal arsitektur *microservices*, perakitan kontainer, pengetatan gerbang keamanan (*JWT & RBAC*), serta kemewahan kecepatan *API Design* abad ke-21 menggunakan `django-ninja` disokong ketangguhan validasi *Pydantic*. Proyek ini menjelma tak hanya sekadar tugas belaka, melainkan miniatur mahakarya kesiapan industri.
