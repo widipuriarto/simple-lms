@@ -1,6 +1,7 @@
 import pymongo
 from django.conf import settings
 from datetime import datetime
+from courses.models import Course, Enrollment, UserProfile
 
 # 1. Membuka koneksi ke MongoDB menggunakan URI yang sudah kita set di settings.py
 client = pymongo.MongoClient(settings.MONGO_URI)
@@ -53,5 +54,11 @@ def get_activity_report():
     for r in results:
         action_name = r["_id"]
         report[action_name] = r["total_count"]
+        
+    # Tambahkan metrik agregat dari PostgreSQL
+    report["total_users"] = UserProfile.objects.filter(role="student").count()
+    report["total_instructors"] = UserProfile.objects.filter(role="instructor").count()
+    report["total_courses"] = Course.objects.count()
+    report["total_enrollments"] = Enrollment.objects.count()
         
     return report

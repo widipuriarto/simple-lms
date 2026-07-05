@@ -4,7 +4,7 @@ from typing import List, Optional
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from courses.models import Course, Enrollment, Lesson, Progress, Comment
-from courses.schemas import CourseOut, CourseDetail, CourseCreateSchema, CourseFilterSchema, CourseUpdateSchema, CommentOut, CommentCreateSchema, ReviewCreateSchema, ReviewOut, WishlistOut, StudentDashboardOut
+from courses.schemas import CourseOut, CourseDetail, CourseCreateSchema, CourseFilterSchema, CourseUpdateSchema, CommentOut, CommentCreateSchema, ReviewCreateSchema, ReviewOut, WishlistOut, StudentDashboardOut, AdminUserOut, AdminEnrollmentOut
 
 from ninja_simple_jwt.auth.ninja_auth import HttpJwtAuth
 from ninja_simple_jwt.auth.views.api import mobile_auth_router
@@ -349,6 +349,9 @@ def create_course(request, payload: CourseCreateSchema):
         instructor=user
     )
 
+    # Hapus cache setiap ada perubahan data
+    cache.clear()
+
     return {
         "id": course.id,
         "title": course.title
@@ -377,6 +380,11 @@ def update_course(
         setattr(course, attr, value)
 
     course.save()
+    
+    # Hapus cache
+    cache.clear()
+
+    return {"status": "success", "message": "Course updated"}
 
     # --- CACHE INVALIDATION ---
     cache.delete(f"course_detail_{course_id}") # Hapus cache spesifik untuk course ini
@@ -497,6 +505,16 @@ def get_analytics(request):
         "status": "success",
         "data": report
     }
+
+@api.get("/admin/users", response=List[AdminUserOut], auth=apiAuth)
+@role_required("admin")
+def list_users(request):
+    return User.objects.select_related("userprofile").all()
+
+@api.get("/admin/enrollments", response=List[AdminEnrollmentOut], auth=apiAuth)
+@role_required("admin")
+def list_enrollments(request):
+    return Enrollment.objects.select_related("user", "course").all()
 
 @api.post("/analytics/export", auth=apiAuth)
 @role_required("admin")

@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-apple-bg text-apple-dark antialiased;
+  }
+  ::selection {
+    @apply bg-apple-blue/20 text-apple-dark;
+  }
+}

@@ -112,3 +112,28 @@ class StudentDashboardOut(Schema):
     recommended_courses: List[CourseOut]  # Menggunakan CourseOut yang sudah ada
 
 
+
+class AdminUserOut(Schema):
+    id: int
+    username: str
+    email: str
+    role: str
+
+    @staticmethod
+    def resolve_role(obj):
+        return obj.userprofile.role if hasattr(obj, 'userprofile') else 'student'
+
+class AdminEnrollmentOut(Schema):
+    id: int
+    user: str
+    course_title: str
+    enrolled_at: datetime
+
+    @staticmethod
+    def resolve_user(obj):
+        return obj.user.username
+
+    @staticmethod
+    def resolve_course_title(obj):
+        return obj.course.title
+

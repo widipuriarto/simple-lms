@@ -4,7 +4,7 @@
 - **Nama:** Puriarto Bagas Widiantoro
 - **NIM:** A11.2023.14962
 - **Mata Kuliah:** Pemrograman Sisi Server 
-- **URL Repository:** https://github.com/widipuriarto/simple-lms](https://github.com/widipuriarto/simple-lms)
+- **URL Repository:** https://github.com/widipuriarto/simple-lms
 
 ## 2. Deskripsi Project
 Simple LMS adalah sebuah sistem manajemen pembelajaran berbasis *backend* yang mengusung arsitektur *microservices-ready*. Dibangun dengan kerangka kerja Django Ninja modern, proyek ini menyediakan fungsionalitas mumpuni; mulai dari hierarki materi (*Section & Lesson*) yang terstruktur, perekaman jejak progres (*Progress*) siswa yang akurat secara matematis, hingga fitur komunitas seperti sistem Ulasan (*Review*) dan Daftar Keinginan (*Wishlist*).
@@ -63,9 +63,9 @@ Sebagai fondasi dari sistem *Learning Management System*, kami telah mendefinisi
 #### 4. Authentication JWT Berjalan & Role admin, instructor, student diterapkan
 **Deskripsi Implementasi:**
 Aplikasi mengamankan *endpoints* dengan menggunakan *JSON Web Token* (JWT) via pustaka `ninja_simple_jwt`. Untuk manajemen hak akses atau *Role-Based Access Control* (RBAC), pengguna dibagi menjadi tiga tingkatan *role*:
-- **Admin**: Wewenang absolut (termasuk penghapusan *Course*).
-- **Instructor**: Diizinkan untuk merancang dan mempublikasikan *Course* beserta *Lesson*.
-- **Student**: Terbatas hanya pada akses konsumsi (*enroll* dan *view* materi).
+- **Admin**: Role absolut (termasuk penghapusan *Course*).
+- **Instructor**: Role yang diizinkan untuk merancang dan mempublikasikan *Course* beserta *Lesson*.
+- **Student**: Role terbatas hanya pada akses konsumsi (*enroll* dan *view* materi).
 
 **Bukti Pengujian:**
 - ![JWT Token](assets/jwt-token.png)
@@ -73,9 +73,9 @@ Aplikasi mengamankan *endpoints* dengan menggunakan *JSON Web Token* (JWT) via p
 - ![Role Forbidden](assets/role-forbidden.png)
 *Hasil penolakan hak akses (Role Forbidden / HTTP 403) ketika akun tipe student mencoba memaksa membuat sebuah course.*
 - ![Role Success](assets/role-success.png)
-*Hasil kesuksesan otorisasi (Role Success) ketika akun tipe instructor sukses membuat sebuah course.*
+*Hasil kesuksesan (Role Success) ketika akun tipe instructor sukses membuat sebuah course.*
 - ![Role Admin](assets/admin-success.png)
-*Hasil pengujian wewenang admin yang sukses menghapus course secara mutlak.*
+*Hasil pengujian role admin yang sukses menghapus course.*
 
 #### 5. Endpoint course, lesson, enrollment, progress berjalan
 **Deskripsi Implementasi:**
@@ -158,13 +158,52 @@ Skrip *seeding* menyediakan konfigurasi identitas praktis:
 | **Instructor** | `instructor` | `123` |
 | **Student** | `student` | `123` |
 
-## 8. Endpoint Penting
-Seluruh antarmuka ini wajib disematkan *Bearer Token* di bagian Auth.
-- `POST /api/v1/auth/token` : Login otentikasi.
-- `GET /api/v1/protected/courses` : Mengambil katalog kursus.
-- `GET /api/v1/protected/courses/{id}` : Mengupas hierarki modul sebuah kursus secara mendalam.
-- `GET /api/v1/protected/dashboard/student` : Merekap rute perjalanan (Dashboard) khusus untuk siswa.
-- `GET /api/v1/protected/courses/{id}/progress` : Melihat persentase ketuntasan materi.
+## 8. Daftar Lengkap API Endpoint
+Seluruh antarmuka ini wajib disematkan *Bearer Token* di bagian Auth (kecuali jalur *Public* tertentu). Daftar ini mencakup keseluruhan API yang terbangun di ekosistem LMS ini:
+
+### A. Authentication & General
+| Endpoint | Method | Role | Keterangan |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/auth/sign-in` | `POST` | Public | Login dan dapatkan Access/Refresh Token (JWT). |
+| `/api/v1/auth/token-refresh`| `POST` | Public | Menyegarkan masa aktif Access Token. |
+| `/api/v1/protected/auth/me` | `GET` | All Auth | Mendapatkan profil kredensial user saat ini. |
+| `/api/v1/protected/` | `GET` | Public | Root API untuk cek status *health*. |
+| `/api/v1/protected/upload` | `POST` | All Auth | Mengunggah file (JPG, PNG, PDF) maks 2MB. |
+
+### B. Course, Review & Comments (Public Consumption)
+| Endpoint | Method | Role | Keterangan |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/protected/courses` | `GET` | Public | Pencarian & penyaringan kursus (*search, level, status, ordering*). |
+| `/api/v1/protected/courses/{id}` | `GET` | Public | Melihat detail kursus beserta *nested curriculum*. |
+| `/api/v1/protected/courses/{id}/reviews`| `GET` | Public | Membaca daftar *rating* dan ulasan kursus. |
+| `/api/v1/protected/courses/{id}/comments`| `GET` | Public | Membaca ruang diskusi/komentar pada kursus. |
+
+### C. Student Experience
+| Endpoint | Method | Role | Keterangan |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/protected/dashboard/student` | `GET` | Student | Ringkasan kursus aktif, tamat, dan rekomendasi khusus siswa. |
+| `/api/v1/protected/enrollments` | `POST` | Student | Mendaftar (Enroll) ke dalam sebuah kursus. |
+| `/api/v1/protected/enrollments/my-courses`| `GET` | Student | Melihat daftar ringkas kursus yang telah di- *enroll*. |
+| `/api/v1/protected/enrollments/{id}/progress`| `POST`| Student | Menandai *lesson* telah selesai dibaca (menyimpan log & trigger Celery). |
+| `/api/v1/protected/courses/{id}/progress` | `GET` | Student | Memeriksa persentase progres belajar (kalkulasi presisi). |
+| `/api/v1/protected/courses/{id}/reviews` | `POST`| Student | Mengirimkan ulasan & *rating* (harus sudah *enroll*). |
+| `/api/v1/protected/courses/{id}/comments` | `POST`| Student | Menambahkan komentar di ruang diskusi. |
+| `/api/v1/protected/wishlist/{course_id}` | `POST`| Student | Memasukkan (atau mengeluarkan) kursus dari daftar Wishlist. |
+| `/api/v1/protected/wishlist` | `GET` | Student | Menarik daftar seluruh kursus favorit (Wishlist). |
+
+### D. Instructor Privilege
+| Endpoint | Method | Role | Keterangan |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/protected/courses` | `POST`| Instructor | Menciptakan draf/publikasi kursus baru. |
+| `/api/v1/protected/courses/{id}` | `PATCH`| Instructor | Menyunting data kursus (validasi *owner* diterapkan). |
+
+### E. Administrator Authority
+| Endpoint | Method | Role | Keterangan |
+| :--- | :---: | :---: | :--- |
+| `/api/v1/protected/courses/{id}` | `DELETE`| Admin | Menghapus entitas kursus secara mutlak. |
+| `/api/v1/protected/comments/{id}` | `DELETE`| Admin/Owner| Menghapus komentar tidak senonoh (bisa juga oleh pembuatnya). |
+| `/api/v1/protected/analytics/reports` | `GET` | Admin | Menarik statistik jumlah user, pendaftaran, dan kursus. |
+| `/api/v1/protected/analytics/export` | `POST`| Admin | Memicu ekspor CSV aktivitas log (melalui Celery Worker). |
 
 ## 9. Kendala dan Solusi
 Beberapa rintangan teknis yang berhasil diatasi sepanjang masa pengerjaan:
